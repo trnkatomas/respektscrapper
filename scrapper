@@ -252,8 +252,8 @@ class Issue():
         book.add_item( stylesheet )
 
         ftoc = []
-        for art in self.content:
-            c = epub.EpubHtml( title = art["title"], file_name = "{0}.xhtml".format( "_".join( art["title"].split() ) ) )
+        for ix, art in enumerate(self.content):
+            c = epub.EpubHtml( title = art["title"], file_name = "{0}.xhtml".format( ix  ) )
             c.content = r"<h2>{0}</h2><strong>{1}</strong><br />".format( 
                                 art["title"], art["subtitle"] ) + art["rawHtml"]
             c.add_item( stylesheet )
