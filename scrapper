@@ -106,16 +106,18 @@ class Issue():
 
 
     def parse_content( self ):
+        
+        try:
+            from progress.bar import Bar
+            bar = Bar( 'Processing', max = len( self.urls_clanku ), suffix = 'Progress: %(index)d/%(max)d | ETA: %(eta)ds' )
 
-        from progress.bar import Bar
-        bar = Bar( 'Processing', max = len( self.urls_clanku ), suffix = 'Progress: %(index)d/%(max)d | ETA: %(eta)ds' )
-
-        for url in self.urls_clanku:
-            self.content.append( self.parse_art( url ) )
-            bar.next()
-        bar.finish()
-
-        # self.content = [self.parse_art( url ) for url in self.urls_clanku]
+            for url in self.urls_clanku:
+                self.content.append( self.parse_art( url ) )
+                bar.next()
+            bar.finish()
+        except ImportError:
+            print('Pro sledování progresu (zbyvajici cas, pocet clanku...) nainstalujte "progress" pomocí "pip install progress')
+            self.content = [self.parse_art( url ) for url in self.urls_clanku]
 
     def prihlaseni_on_art( self ):
 
