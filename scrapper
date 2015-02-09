@@ -116,7 +116,7 @@ class Issue():
                 bar.next()
             bar.finish()
         except ImportError:
-            print('Pro sledování progresu (zbyvajici cas, pocet clanku...) nainstalujte "progress" pomocí "pip install progress')
+            print('Pro sledování progresu (zbyvajici cas, pocet clanku...) \nnainstalujte "progress" pomocí "pip install progress"')
             self.content = [self.parse_art( url ) for url in self.urls_clanku]
 
     def prihlaseni_on_art( self ):
