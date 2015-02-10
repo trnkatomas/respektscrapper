@@ -30,6 +30,7 @@ parser.add_argument( '-g', '--png', help = "Krome epub formatu vytvori take sloz
                       action = 'store_true' )
 parser.add_argument( '-l', '--enlist', help = "Vypise dostupna cisla v archivu a jejich URL", action = 'store_true' )
 parser.add_argument( '-e', '--email_prijemce', type = str, help = 'Posle vysledny epub na uvedeny mail.' )
+parser.add_argument( '-n', '--pocet_clanku', type = int, default = None, help = 'Kolik clanku se ma zpracovat' )
 args = parser.parse_args()
 
 class Issue():
@@ -79,7 +80,7 @@ class Issue():
         print( "Zpracovavam cislo: ", self.vydano )
 
         allArts = self.driver.find_elements_by_css_selector( "#main > div.col12 > div.ow-enclose > div > h2 > a" )
-        self.urls_clanku = [art.get_attribute( "href" ) for art in allArts]
+        self.urls_clanku = [art.get_attribute( "href" ) for art in allArts][:args.pocet_clanku]
 
     def check_issue( self ):
         with open( args.history_filename, "r", encoding = "utf8" ) as histfile:
@@ -106,7 +107,7 @@ class Issue():
 
 
     def parse_content( self ):
-        
+
         try:
             from progress.bar import Bar
             bar = Bar( 'Processing', max = len( self.urls_clanku ), suffix = 'Progress: %(index)d/%(max)d | ETA: %(eta)ds' )
@@ -116,7 +117,7 @@ class Issue():
                 bar.next()
             bar.finish()
         except ImportError:
-            print('Pro sledování progresu (zbyvajici cas, pocet clanku...) \nnainstalujte "progress" pomocí "pip install progress"')
+            print( 'Pro sledování progresu (zbyvajici cas, pocet clanku...) \nnainstalujte "progress" pomocí "pip install progress"' )
             self.content = [self.parse_art( url ) for url in self.urls_clanku]
 
     def prihlaseni_on_art( self ):
@@ -235,6 +236,7 @@ class Issue():
     def make_epub( self ):
 
         from ebooklib import epub
+        from ebooklib.plugins import standard
 
         book = epub.EpubBook()
 
@@ -245,6 +247,7 @@ class Issue():
                    .detail-odstavec { margin: 10px 0; }
                    .detail-mezititulek    { margin-top: 10px !important; font: bold 18px Arial; }
                 """
+        book.add_author( "Respekt" )
 
         nav_css = epub.EpubItem( uid = "style_nav", file_name = "style/nav.css", media_type = "text/css", content = style )
         stylesheet = epub.EpubItem( uid = "style_stylesheet", file_name = "style/stylesheet.css", media_type = "text/css", content = style )
@@ -252,8 +255,9 @@ class Issue():
         book.add_item( stylesheet )
 
         ftoc = []
-        for ix, art in enumerate(self.content):
-            c = epub.EpubHtml( title = art["title"], file_name = "{0}.xhtml".format( ix  ) )
+        for ix, art in enumerate( self.content ):
+            c = epub.EpubHtml( title = art["title"], file_name = "{0}.xhtml".format( ix ),
+                               media_type = "application/xhtml+xml" )
             c.content = r"<h2>{0}</h2><strong>{1}</strong><br />".format( 
                                 art["title"], art["subtitle"] ) + art["rawHtml"]
             c.add_item( stylesheet )
@@ -264,7 +268,7 @@ class Issue():
 
         for img in os.listdir( "images" ):
             pathe = "images/{0}".format( img )
-            im = epub.EpubItem( file_name = pathe, media_type = "image/jpg" )
+            im = epub.EpubItem( file_name = pathe, media_type = "image/jpeg" )
             with open( pathe, "b+r" ) as ifile:
                 im.content = ifile.read()
             book.add_item( im )
@@ -277,7 +281,7 @@ class Issue():
 
         nazev = "respekt_{0}.epub".format( self.vydano )
         self.nazev_ebook = nazev
-        epub.write_epub( nazev , book, {} )
+        epub.write_epub( nazev , book, {'plugins': [standard.SyntaxPlugin()]} )
 
         if args.email_prijemce:
             self.send_book()
