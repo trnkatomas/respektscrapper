@@ -84,18 +84,19 @@ class Issue():
 
     def check_issue( self ):
         with open( args.history_filename, "r", encoding = "utf8" ) as histfile:
-            first_line_raw = histfile.readline()[:-1]  # nechci \n
-        first_line = first_line_raw.split( '/' )
+            first_line_raw = histfile.readline()
+        first_line_ws = first_line_raw.split( '/' )
+        first_line = [int(i) for i in first_line_ws]
         first_issue_raw = self.get_cisla()[0]
-        first_issue = first_issue_raw.text.split( '/' )
+        first_issue_s = first_issue_raw.text.split( '/' )
+        first_issue = [int(i) for i in first_issue_s]
         href = first_issue_raw.get_attribute( "href" )
-
 
         if first_line == first_issue:
             return( False, None )
-        elif int( first_line[1] ) < int( first_issue[1] ):  # roky
+        elif first_line[1] < first_issue[1]:  # roky
             return( True, href )
-        elif int( first_line[0] ) < int( first_issue[0] ):  # cislo
+        elif  first_line[0] < first_issue[0]:  # cislo
             return( True, href )
         else:
             raise RuntimeError( "Chyba v hledani posledniho cislo a porovnani ze souboru {0}".format( args.history_filename ) )
