@@ -290,7 +290,7 @@ class Issue():
         if args.history_filename:
             print( 'Zapisuji do {0} na prvni radku, ze cislo {1} bylo zpracovano.'.format( args.history_filename, csl ) )
             with open( args.history_filename, "w", encoding = "utf8" ) as histf:
-                histf.write( csl )
+                histf.write( csl + "\n" )
 
         # ## Cleaning
         os.system( "rm -rf images ghostdriver.log" )
