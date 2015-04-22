@@ -31,6 +31,7 @@ parser.add_argument( '-g', '--png', help = "Krome epub formatu vytvori take sloz
 parser.add_argument( '-l', '--enlist', help = "Vypise dostupna cisla v archivu a jejich URL", action = 'store_true' )
 parser.add_argument( '-e', '--email_prijemce', type = str, help = 'Posle vysledny epub na uvedeny mail.' )
 parser.add_argument( '-n', '--pocet_clanku', type = int, default = None, help = 'Kolik clanku se ma zpracovat' )
+parser.add_argument( '-r', '--remove', action='store_true', help="Smaz vysledny epub (napriklad po odeslani na email)")
 args = parser.parse_args()
 
 class Issue():
@@ -295,6 +296,8 @@ class Issue():
 
         # ## Cleaning
         os.system( "rm -rf images ghostdriver.log" )
+        if args.remove:
+            os.system("rm -rf {0}".format(nazev))
 
     def send_book( self ):
         print( 'Posilam email...' )
