@@ -91,7 +91,7 @@ class Issue:
 
         print("Zpracovavam cislo: ", self.vydano)
 
-        self.cover = self.get_cover()
+        self.get_cover()
 
         all_arts = self.driver.find_elements_by_xpath('//a[@class="issuedetail-categorized-item"]')
         self.urls_clanku = [art.get_attribute("href") for art in all_arts][:args.pocet_clanku]
@@ -247,22 +247,22 @@ class Issue:
     def cisti_html(self, raw_html):
         soup = BeautifulSoup(raw_html, "lxml")
 
-        """for i in soup.findAll("div"):
+        for i in soup.findAll("div"):
             try:
                 if i["id"] == "text":
                     pass
                 else:
                     i.extract()
             except KeyError:
-                i.extract()"""
+                i.extract()
 
         return soup
 
     def make_epub(self):
-        book = epub.EpubBook()        
-        if self.cover:
-            cov = epub.EpubCover(file_name=self.cover)
-            book.add_item(cov)
+        book = epub.EpubBook()    
+        print(self.cover)    
+        if self.cover:            
+            book.set_cover("images/cover.jpg", open(self.cover, 'rb').read())
         book.set_identifier('respekt_{0}'.format(self.vydano))
         book.set_title("respekt_{0}".format(self.vydano))
         book.set_language("cs")
@@ -304,7 +304,7 @@ class Issue:
         book.add_item(epub.EpubNav())
 
         # basic spine
-        book.spine = ['nav'] + ftoc
+        book.spine = ['cover', 'nav'] + ftoc
 
         nazev = "respekt_{0}.epub".format(self.vydano)
         self.nazev_ebook = nazev
@@ -359,9 +359,9 @@ class Issue:
         except FileExistsError:
             pass
         if img_path:
-            r = request.urlopen(img_path)
+            response = request.urlopen(img_path)
             with open(path, "b+w") as pic:
-                pic.write(r.read())        
+                pic.write(response.read())        
             self.cover = path
 
 
